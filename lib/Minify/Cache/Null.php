@@ -18,7 +18,7 @@ class Minify_Cache_Null implements Minify_CacheInterface
      *
      * @return bool success
      */
-    public function store($id, $data)
+    public function store(string $id, string $data): bool
     {
     }
 
@@ -29,19 +29,19 @@ class Minify_Cache_Null implements Minify_CacheInterface
      *
      * @return int size in bytes
      */
-    public function getSize($id)
+    public function getSize(string $id): int
     {
     }
 
     /**
      * Does a valid cache entry exist?
      *
-     * @param string $id       cache id (e.g. a filename)
-     * @param int    $srcMtime mtime of the original source file(s)
+     * @param string $id cache id (e.g. a filename)
+     * @param int $srcMtime mtime of the original source file(s)
      *
      * @return bool exists
      */
-    public function isValid($id, $srcMtime)
+    public function isValid(string $id, int $srcMtime): bool
     {
     }
 
@@ -50,7 +50,7 @@ class Minify_Cache_Null implements Minify_CacheInterface
      *
      * @param string $id cache id (e.g. a filename)
      */
-    public function display($id)
+    public function display(string $id): void
     {
     }
 
@@ -61,7 +61,7 @@ class Minify_Cache_Null implements Minify_CacheInterface
      *
      * @return string
      */
-    public function fetch($id)
+    public function fetch(string $id): string
     {
     }
 }

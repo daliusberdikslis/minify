@@ -1,35 +1,37 @@
 <?php
 /**
- * Class Minify_Cache_Wincache
+ * Class Minify_Cache_Memcached
  * @package Minify
  */
 
 /**
- * WinCache-based cache class for Minify
+ * Memcached-based cache class for Minify
  *
  * <code>
- * Minify::setCache(new Minify_Cache_WinCache());
+ * // fall back to disk caching if memcached can't connect
+ * $memcached = new Memcached;
+ * if ($memcached->addServer('localhost', 11211)) {
+ *     Minify::setCache(new Minify_Cache_Memcached($memcached));
+ * } else {
+ *     Minify::setCache();
+ * }
  * </code>
- *
- * @package Minify
- * @author Matthias Fax
  **/
-class Minify_Cache_WinCache implements Minify_CacheInterface
+class Minify_Cache_Memcached implements Minify_CacheInterface
 {
+
     /**
-     * Create a Minify_Cache_Wincache object, to be passed to
+     * Create a Minify_Cache_Memcached object, to be passed to
      * Minify::setCache().
+     *
+     * @param Memcached $memcached already-connected instance
      *
      * @param int $expire seconds until expiration (default = 0
      * meaning the item will not get an expiration date)
-     *
-     * @throws Exception
      */
-    public function __construct($expire = 0)
+    public function __construct(Memcached $memcached, $expire = 0)
     {
-        if (!function_exists('wincache_ucache_info')) {
-            throw new Exception("WinCache for PHP is not installed to be able to use Minify_Cache_WinCache!");
-        }
+        $this->_mc = $memcached;
         $this->_exp = $expire;
     }
 
@@ -42,9 +44,9 @@ class Minify_Cache_WinCache implements Minify_CacheInterface
      *
      * @return bool success
      */
-    public function store($id, $data)
+    public function store(string $id, string $data): bool
     {
-        return wincache_ucache_set($id, "{$_SERVER['REQUEST_TIME']}|{$data}", $this->_exp);
+        return $this->_mc->set($id, "{$_SERVER['REQUEST_TIME']}|{$data}", $this->_exp);
     }
 
     /**
@@ -54,17 +56,17 @@ class Minify_Cache_WinCache implements Minify_CacheInterface
      *
      * @return int size in bytes
      */
-    public function getSize($id)
+    public function getSize(string $id): int
     {
         if (!$this->_fetch($id)) {
             return false;
         }
 
-        if (function_exists('mb_strlen') && ((int) ini_get('mbstring.func_overload') & 2)) {
+        if (function_exists('mb_strlen')) {
             return mb_strlen($this->_data, '8bit');
-        } else {
-            return strlen($this->_data);
         }
+
+        return strlen($this->_data);
     }
 
     /**
@@ -76,7 +78,7 @@ class Minify_Cache_WinCache implements Minify_CacheInterface
      *
      * @return bool exists
      */
-    public function isValid($id, $srcMtime)
+    public function isValid(string $id, int $srcMtime): bool
     {
         return ($this->_fetch($id) && ($this->_lm >= $srcMtime));
     }
@@ -86,7 +88,7 @@ class Minify_Cache_WinCache implements Minify_CacheInterface
      *
      * @param string $id cache id
      */
-    public function display($id)
+    public function display(string $id): void
     {
         echo $this->_fetch($id) ? $this->_data : '';
     }
@@ -98,40 +100,40 @@ class Minify_Cache_WinCache implements Minify_CacheInterface
      *
      * @return string
      */
-    public function fetch($id)
+    public function fetch(string $id): string
     {
         return $this->_fetch($id) ? $this->_data : '';
     }
 
-    private $_exp = null;
+    private $_mc;
+    private $_exp;
 
     // cache of most recently fetched id
-    private $_lm = null;
-    private $_data = null;
-    private $_id = null;
+    private $_lm;
+    private $_data;
+    private $_id;
 
     /**
-     * Fetch data and timestamp from WinCache, store in instance
+     * Fetch data and timestamp from memcached, store in instance
      *
      * @param string $id
      *
      * @return bool success
      */
-    private function _fetch($id)
+    private function _fetch(string $id): bool
     {
         if ($this->_id === $id) {
             return true;
         }
 
-        $suc = false;
-        $ret = wincache_ucache_get($id, $suc);
-        if (!$suc) {
+        $ret = $this->_mc->get($id);
+        if (false === $ret) {
             $this->_id = null;
 
             return false;
         }
 
-        list($this->_lm, $this->_data) = explode('|', $ret, 2);
+        [$this->_lm, $this->_data] = explode('|', $ret, 2);
         $this->_id = $id;
 
         return true;

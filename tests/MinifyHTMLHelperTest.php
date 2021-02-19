@@ -9,14 +9,14 @@ class MinifyHTMLHelperTest extends TestCase
 {
     private $realDocRoot;
 
-    public function setUp()
+    public function setUp():void
     {
         $this->realDocRoot = $_SERVER['DOCUMENT_ROOT'];
         $_SERVER['DOCUMENT_ROOT'] = self::$document_root;
     }
 
     // TODO: this is probably not needed if backupGlobals is enabled?
-    public function tearDown()
+    public function tearDown():void
     {
         $_SERVER['DOCUMENT_ROOT'] = $this->realDocRoot;
     }

@@ -19,7 +19,7 @@ interface Minify_CacheInterface
      *
      * @return bool success
      */
-    public function store($id, $data);
+    public function store(string $id, string $data): bool;
 
     /**
      * Get the size of a cache entry
@@ -28,24 +28,24 @@ interface Minify_CacheInterface
      *
      * @return int size in bytes
      */
-    public function getSize($id);
+    public function getSize(string $id): int;
 
     /**
      * Does a valid cache entry exist?
      *
-     * @param string $id       cache id (e.g. a filename)
-     * @param int    $srcMtime mtime of the original source file(s)
+     * @param string $id cache id (e.g. a filename)
+     * @param int $srcMtime mtime of the original source file(s)
      *
      * @return bool exists
      */
-    public function isValid($id, $srcMtime);
+    public function isValid(string $id, int $srcMtime): bool;
 
     /**
      * Send the cached content to output
      *
      * @param string $id cache id (e.g. a filename)
      */
-    public function display($id);
+    public function display(string $id): void;
 
     /**
      * Fetch the cached content
@@ -54,5 +54,5 @@ interface Minify_CacheInterface
      *
      * @return string
      */
-    public function fetch($id);
+    public function fetch(string $id): string;
 }

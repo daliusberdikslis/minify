@@ -6,7 +6,7 @@ use Minify_Cache_File;
 
 class MinifyCacheFileTest extends TestCase
 {
-    public function test1()
+    public function test1(): void
     {
         $data = str_repeat(md5(time()) . 'í', 100); // 3400 bytes in UTF-8
         $id = 'Minify_test_cache_noLock';
@@ -18,7 +18,7 @@ class MinifyCacheFileTest extends TestCase
     /**
      * test with locks
      */
-    public function test2()
+    public function test2(): void
     {
         $data = str_repeat(md5(time()) . 'í', 100); // 3400 bytes in UTF-8
         $id = 'Minify_test_cache_withLock';

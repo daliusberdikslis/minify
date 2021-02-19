@@ -9,18 +9,22 @@ class HTTPEncoderTest extends TestCase
     /**
      * @dataProvider ToIe6DataProvider
      * @preserveGlobals
+     * @param $ua
+     * @param $ae
+     * @param $exp
+     * @param $desc
      */
-    public function testToIe6($ua, $ae, $exp, $desc)
+    public function testToIe6($ua, $ae, $exp, $desc): void
     {
         HTTP_Encoder::$encodeToIe6 = true;
 
         $_SERVER['HTTP_USER_AGENT'] = $ua;
         $_SERVER['HTTP_ACCEPT_ENCODING'] = $ae;
         $ret = HTTP_Encoder::getAcceptedEncoding();
-        $this->assertSame($exp, $ret, $desc);
+        self::assertSame($exp, $ret, $desc);
     }
 
-    public function ToIe6DataProvider()
+    public function ToIe6DataProvider(): array
     {
         return array(
             array(
@@ -70,18 +74,22 @@ class HTTPEncoderTest extends TestCase
 
     /**
      * @dataProvider EncodeNonIeDataProvider
+     * @param $ua
+     * @param $ae
+     * @param $exp
+     * @param $desc
      */
-    public function testEncodeNonIe($ua, $ae, $exp, $desc)
+    public function testEncodeNonIe($ua, $ae, $exp, $desc): void
     {
         HTTP_Encoder::$encodeToIe6 = false;
 
         $_SERVER['HTTP_USER_AGENT'] = $ua;
         $_SERVER['HTTP_ACCEPT_ENCODING'] = $ae;
         $ret = HTTP_Encoder::getAcceptedEncoding();
-        $this->assertSame($exp, $ret, $desc);
+        self::assertSame($exp, $ret, $desc);
     }
 
-    public function EncodeNonIeDataProvider()
+    public function EncodeNonIeDataProvider(): array
     {
         return array(
             array(
@@ -93,11 +101,11 @@ class HTTPEncoderTest extends TestCase
         );
     }
 
-    public function testZlibEncode()
+    public function testZlibEncode(): void
     {
         $have_zlib = function_exists('gzdeflate');
         if (!$have_zlib) {
-            $this->markTestSkipped('Zlib support is not present in PHP. Encoding cannot be performed/tested.');
+            self::markTestSkipped('Zlib support is not present in PHP. Encoding cannot be performed/tested.');
         }
 
         // test compression of varied content (HTML,JS, & CSS)
@@ -123,12 +131,12 @@ class HTTPEncoderTest extends TestCase
             // test uncompression
             $roundTrip = call_user_func($test['inv'], $e->getContent());
             $desc = "{$test['method']} : uncompress possible";
-            $this->assertSame($variedContent, $roundTrip, $desc);
+            self::assertSame($variedContent, $roundTrip, $desc);
 
             // test expected compressed size
             $desc = "{$test['method']} : compressed to "
                 . sprintf('%4.2f%% of original', $ret / $variedLength * 100);
-            $this->assertLessThan(100, abs($ret - $test['exp']), $desc);
+            self::assertLessThan(100, abs($ret - $test['exp']), $desc);
         }
 
         HTTP_Encoder::$encodeToIe6 = true;
@@ -136,13 +144,13 @@ class HTTPEncoderTest extends TestCase
         $he = new HTTP_Encoder(array('content' => 'Hello'));
         $he->encode();
         $headers = $he->getHeaders();
-        $this->assertTrue(isset($headers['Vary']), 'Vary always sent to good browsers');
+        self::assertTrue(isset($headers['Vary']), 'Vary always sent to good browsers');
 
         $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)';
         $he = new HTTP_Encoder(array('content' => 'Hello'));
         $he->encode();
         $headers = $he->getHeaders();
-        $this->assertTrue(!isset($headers['Vary']), 'Vary not sent to bad IE (Issue 126)');
+        self::assertTrue(!isset($headers['Vary']), 'Vary not sent to bad IE (Issue 126)');
     }
 }
 
@@ -153,12 +161,12 @@ function _gzdecode($data)
 }
 
 // http://www.php.net/manual/en/function.gzdecode.php#82930
-function _phpman_gzdecode($data, &$filename='', &$error='', $maxlength=null)
+function _phpman_gzdecode($data, &$filename = '', &$error = '', $maxlength = null)
 {
     $mbIntEnc = null;
     $hasMbOverload = (function_exists('mb_strlen')
-                      && (ini_get('mbstring.func_overload') !== '')
-                      && ((int)ini_get('mbstring.func_overload') & 2));
+        && (ini_get('mbstring.func_overload') !== '')
+        && ((int)ini_get('mbstring.func_overload') & 2));
     if ($hasMbOverload) {
         $mbIntEnc = mb_internal_encoding();
         mb_internal_encoding('8bit');
@@ -174,7 +182,7 @@ function _phpman_gzdecode($data, &$filename='', &$error='', $maxlength=null)
         return null;  // Not GZIP format (See RFC 1952)
     }
     $method = ord(substr($data, 2, 1));  // Compression method
-    $flags  = ord(substr($data, 3, 1));  // Flags
+    $flags = ord(substr($data, 3, 1));  // Flags
     if ($flags & 31 != $flags) {
         $error = "Reserved bits not allowed.";
         if ($mbIntEnc !== null) {
@@ -185,11 +193,11 @@ function _phpman_gzdecode($data, &$filename='', &$error='', $maxlength=null)
     // NOTE: $mtime may be negative (PHP integer limitations)
     $mtime = unpack("V", substr($data, 4, 4));
     $mtime = $mtime[1];
-    $xfl   = substr($data, 8, 1);
-    $os    = substr($data, 8, 1);
+    $xfl = substr($data, 8, 1);
+    $os = substr($data, 8, 1);
     $headerlen = 10;
-    $extralen  = 0;
-    $extra     = "";
+    $extralen = 0;
+    $extra = "";
     if ($flags & 4) {
         // 2-byte length prefixed EXTRA data in header
         if ($len - $headerlen - 2 < 8) {
@@ -276,7 +284,7 @@ function _phpman_gzdecode($data, &$filename='', &$error='', $maxlength=null)
     $isize = unpack("V", substr($data, -4));
     $isize = $isize[1];
     // decompression:
-    $bodylen = $len-$headerlen-8;
+    $bodylen = $len - $headerlen - 8;
     if ($bodylen < 1) {
         // IMPLEMENTATION BUG!
         if ($mbIntEnc !== null) {
@@ -288,20 +296,20 @@ function _phpman_gzdecode($data, &$filename='', &$error='', $maxlength=null)
     $data = "";
     if ($bodylen > 0) {
         switch ($method) {
-        case 8:
-            // Currently the only supported compression method:
-            $data = gzinflate($body, $maxlength);
-            break;
-        default:
-            $error = "Unknown compression method.";
-            if ($mbIntEnc !== null) {
-                mb_internal_encoding($mbIntEnc);
-            }
-            return false;
+            case 8:
+                // Currently the only supported compression method:
+                $data = gzinflate($body, $maxlength);
+                break;
+            default:
+                $error = "Unknown compression method.";
+                if ($mbIntEnc !== null) {
+                    mb_internal_encoding($mbIntEnc);
+                }
+                return false;
         }
     }  // zero-byte body content is allowed
     // Verifiy CRC32
-    $crc   = sprintf("%u", crc32($data));
+    $crc = sprintf("%u", crc32($data));
     $crcOK = $crc == $datacrc;
     $lenOK = $isize == strlen($data);
     if (!$lenOK || !$crcOK) {

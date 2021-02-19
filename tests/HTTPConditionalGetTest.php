@@ -6,7 +6,7 @@ use HTTP_ConditionalGet;
 
 class HTTPConditionalGetTest extends TestCase
 {
-    public function TestData()
+    public function TestData(): array
     {
         /*
          * NOTE: calculate $lmTime as parameter
@@ -18,7 +18,7 @@ class HTTPConditionalGetTest extends TestCase
         $lmTime = time() - 900;
         $gmtTime = gmdate('D, d M Y H:i:s \G\M\T', $lmTime);
 
-        $tests = array(
+        return array(
             array(
                 'lm' => $lmTime,
                 'desc' => 'client has valid If-Modified-Since',
@@ -115,21 +115,23 @@ class HTTPConditionalGetTest extends TestCase
                 ),
             ),
         );
-        return $tests;
     }
 
     /**
      * @dataProvider TestData
+     * @param $lmTime
+     * @param $desc
+     * @param $inm
+     * @param $ims
+     * @param $exp
      */
-    public function test_HTTP_ConditionalGet($lmTime, $desc, $inm, $ims, $exp)
+    public function test_HTTP_ConditionalGet($lmTime, $desc, $inm, $ims, $exp): void
     {
         // setup env
         if (null === $inm) {
             unset($_SERVER['HTTP_IF_NONE_MATCH']);
         } else {
-            $_SERVER['HTTP_IF_NONE_MATCH'] = PHP_VERSION_ID < 50400 && get_magic_quotes_gpc()
-                ? addslashes($inm) :
-                $inm;
+            $_SERVER['HTTP_IF_NONE_MATCH'] = $inm;
         }
 
         if (null === $ims) {
@@ -145,6 +147,6 @@ class HTTPConditionalGetTest extends TestCase
         $ret = $cg->getHeaders();
         $ret['isValid'] = $cg->cacheIsValid;
 
-        $this->assertEquals($exp, $ret, $desc);
+        self::assertEquals($exp, $ret, $desc);
     }
 }

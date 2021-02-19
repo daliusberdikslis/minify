@@ -7,11 +7,11 @@ use Minify_CacheInterface;
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
     /** @var string */
-    protected static $document_root;
+    protected static string $document_root;
     /** @var string */
-    protected static $test_files;
+    protected static string $test_files;
 
-    public static function setupBeforeClass()
+    public static function setupBeforeClass(): void
     {
         self::$document_root = __DIR__;
         self::$test_files = __DIR__ . '/_test_files';
@@ -23,9 +23,9 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * @param string $str
      * @return int
      */
-    protected function countBytes($str)
+    protected function countBytes(string $str): int
     {
-        return (function_exists('mb_strlen') && ((int)ini_get('mbstring.func_overload') & 2))
+        return (function_exists('mb_strlen'))
             ? mb_strlen($str, '8bit')
             : strlen($str);
     }
@@ -37,19 +37,18 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * @param string $id
      * @param string $data
      */
-    protected function assertTestCache(Minify_CacheInterface $cache, $id, $data)
+    protected function assertTestCache(Minify_CacheInterface $cache, string $id, string $data): void
     {
-        $this->assertTrue($cache->store($id, $data), "$id store");
-        $this->assertEquals($cache->getSize($id), $this->countBytes($data), "$id getSize");
-        $this->assertTrue($cache->isValid($id, $_SERVER['REQUEST_TIME'] - 10), "$id isValid");
+        self::assertTrue($cache->store($id, $data), "$id store");
+        self::assertEquals($cache->getSize($id), $this->countBytes($data), "$id getSize");
+        self::assertTrue($cache->isValid($id, $_SERVER['REQUEST_TIME'] - 10), "$id isValid");
 
         ob_start();
         $cache->display($id);
-        $displayed = ob_get_contents();
-        ob_end_clean();
+        $displayed = ob_get_clean();
 
-        $this->assertSame($data, $displayed, "$id display");
-        $this->assertEquals($data, $cache->fetch($id), "$id fetch");
+        self::assertSame($data, $displayed, "$id display");
+        self::assertEquals($data, $cache->fetch($id), "$id fetch");
     }
 
     /**
@@ -59,14 +58,14 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      * @param string $filename
      * @return string
      */
-    protected function getDataFile($filename)
+    protected function getDataFile(string $filename): string
     {
         $path = self::$test_files . '/' . $filename;
-        $this->assertFileExists($path);
+        self::assertFileExists($path);
         $contents = file_get_contents($path);
-        $this->assertNotEmpty($contents);
+        self::assertNotEmpty($contents);
         $contents = trim($contents);
-        $this->assertNotEmpty($contents);
+        self::assertNotEmpty($contents);
 
         return $contents;
     }

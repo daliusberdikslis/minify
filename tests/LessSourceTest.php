@@ -6,16 +6,15 @@ use Minify_HTML_Helper;
 
 class LessSourceTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
-        $this->realDocRoot = $_SERVER['DOCUMENT_ROOT'];
         $_SERVER['DOCUMENT_ROOT'] = self::$document_root;
     }
 
     /**
      * @link https://github.com/mrclay/minify/issues/500
      */
-    public function testLessTimestamp()
+    public function testLessTimestamp(): void
     {
         $baseDir = self::$test_files;
 
@@ -37,6 +36,6 @@ class LessSourceTest extends TestCase
         );
         $res = Minify_HTML_Helper::getUri('less', $options);
 
-        $this->assertEquals("/min/g=less&amp;{$max}", $res);
+        self::assertEquals("/min/g=less&amp;{$max}", $res);
     }
 }

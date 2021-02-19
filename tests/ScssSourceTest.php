@@ -6,16 +6,15 @@ use Minify_HTML_Helper;
 
 class ScssSourceTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
-        $this->realDocRoot = $_SERVER['DOCUMENT_ROOT'];
         $_SERVER['DOCUMENT_ROOT'] = self::$document_root;
     }
 
     /**
      * @link https://github.com/mrclay/minify/issues/500
      */
-    public function testTimestamp()
+    public function testTimestamp(): void
     {
         $baseDir = self::$test_files;
 
@@ -37,6 +36,6 @@ class ScssSourceTest extends TestCase
         );
         $res = Minify_HTML_Helper::getUri('scss', $options);
 
-        $this->assertEquals("/min/g=scss&amp;{$max}", $res);
+        self::assertEquals("/min/g=scss&amp;{$max}", $res);
     }
 }

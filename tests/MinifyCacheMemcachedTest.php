@@ -3,26 +3,26 @@
 namespace Minify\Test;
 
 use Memcache;
-use Minify_Cache_Memcache;
+use Minify_Cache_Memcached;
 
-class MinifyCacheMemcacheTest extends TestCase
+class MinifyCacheMemcachedTest extends TestCase
 {
-    /** @var Memcache */
-    private $mc;
+    /** @var Memcached */
+    private Memcached $mc;
 
-    public function setUp()
+    public function setUp():void
     {
-        if (!function_exists('memcache_set')) {
-            $this->markTestSkipped("To test this component, install memcache in PHP");
+        if (!function_exists('addServer')) {
+            self::markTestSkipped("To test this component, install memcached in PHP");
         }
 
-        $this->mc = new Memcache();
-        if (!$this->mc->connect('localhost', 11211)) {
-            $this->markTestSkipped("Memcache server not found on localhost:11211");
+        $this->mc = new Memcached();
+        if (!$this->mc->addServer('localhost', 11211)) {
+            self::markTestSkipped("Memcached server not found on localhost:11211");
         }
     }
 
-    public function test1()
+    public function test1(): void
     {
         $data = str_repeat(md5(time()) . 'í', 100); // 3400 bytes in UTF-8
         $id = 'Minify_test_memcache';
@@ -31,10 +31,10 @@ class MinifyCacheMemcacheTest extends TestCase
         $this->assertTestCache($cache, $id, $data);
     }
 
-    public function test2()
+    public function test2(): void
     {
         if (!function_exists('gzencode')) {
-            $this->markTestSkipped("enable gzip extension to test this");
+            self::markTestSkipped("enable gzip extension to test this");
         }
 
         $data = str_repeat(md5(time()) . 'í', 100); // 3400 bytes in UTF-8

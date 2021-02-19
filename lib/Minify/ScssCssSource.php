@@ -1,7 +1,7 @@
 <?php
-use Leafo\ScssPhp\Compiler;
-use Leafo\ScssPhp\Server;
-use Leafo\ScssPhp\Version;
+
+use ScssPhp\ScssPhp\Compiler;
+use ScssPhp\ScssPhp\Version;
 
 /**
  * Class for using SCSS files
@@ -37,7 +37,7 @@ class Minify_ScssCssSource extends Minify_Source
      *
      * @return int
      */
-    public function getLastModified()
+    public function getLastModified(): int
     {
         $cache = $this->getCache();
 
@@ -49,7 +49,7 @@ class Minify_ScssCssSource extends Minify_Source
      *
      * @return string
      */
-    public function getContent()
+    public function getContent(): string
     {
         $cache = $this->getCache();
 
@@ -63,7 +63,7 @@ class Minify_ScssCssSource extends Minify_Source
      *
      * @return string
      */
-    private function getCacheId($prefix = 'minify')
+    private function getCacheId($prefix = 'minify'): string
     {
         $md5 = md5($this->filepath);
 
@@ -79,7 +79,7 @@ class Minify_ScssCssSource extends Minify_Source
      *
      * @return array
      */
-    private function getCache()
+    private function getCache(): ?array
     {
         // cache for single run
         // so that getLastModified and getContent in single request do not add additional cache roundtrips (i.e memcache)
@@ -90,13 +90,12 @@ class Minify_ScssCssSource extends Minify_Source
         // check from cache first
         $cache = null;
         $cacheId = $this->getCacheId();
-        if ($this->cache->isValid($cacheId, 0)) {
-            if ($cache = $this->cache->fetch($cacheId)) {
-                $cache = unserialize($cache);
-            }
+        if ($this->cache->isValid($cacheId, 0) &&
+            $cache = $this->cache->fetch($cacheId)) {
+            $cache = unserialize($cache);
         }
 
-        $input = $cache ? $cache : $this->filepath;
+        $input = $cache ?: $this->filepath;
 
         if ($this->cacheIsStale($cache)) {
             $cache = $this->compile($this->filepath);
@@ -139,8 +138,8 @@ class Minify_ScssCssSource extends Minify_Source
      *
      * @param string $filename Input path (.scss)
      *
-     * @see Server::compile()
      * @return array meta data result of the compile
+     * @see Server::compile()
      */
     private function compile($filename)
     {
