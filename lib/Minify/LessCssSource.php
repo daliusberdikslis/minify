@@ -1,6 +1,6 @@
 <?php
 
-use LesserPhp\Compiler;
+require_once __DIR__ . '/../../lessc.inc.php';
 
 class Minify_LessCssSource extends Minify_Source
 {
@@ -117,11 +117,11 @@ class Minify_LessCssSource extends Minify_Source
     /**
      * Get instance of less compiler
      *
-     * @return Compiler
+     * @return lessc
      */
-    private function getCompiler()
+    private function getCompiler(): lessc
     {
-        $less = new Compiler();
+        $less = new lessc();
         // do not spend CPU time letting less doing minify
         $less->setPreserveComments(true);
 
