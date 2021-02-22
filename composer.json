@@ -1,5 +1,5 @@
 {
-  "name": "mrclay/minify",
+  "name": "daliusberdikslis/minify",
   "type": "library",
   "description": "Minify is a PHP app that helps you follow several rules for client-side performance. It combines multiple CSS or Javascript files, removes unnecessary whitespace and comments, and serves them with gzip encoding and optimal client-side cache headers",
   "homepage": "https://github.com/mrclay/minify",
