@@ -27,7 +27,7 @@ use Minify;
  * @property array                            $groupsConfig
  * @property string                           $groupsConfigPath
  * @property LoggerInterface         $logger
- * @property \Minify                          $minify
+ * @property Minify                          $minify
  * @property array                            $serveOptions
  * @property Minify_Source_Factory           $sourceFactory
  * @property array                            $sourceFactoryOptions
